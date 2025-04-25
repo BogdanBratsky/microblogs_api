@@ -2,6 +2,7 @@ package memory
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -10,16 +11,16 @@ import (
 )
 
 type UserMemoryRepo struct {
-	data map[int]model.User
+	data map[int]*model.User
 }
 
 func NewUserMemoryRepo() repository.UserRepository {
 	return &UserMemoryRepo{
 		// Создание карты пользователей
-		data: func(count int) map[int]model.User {
-			var users = make(map[int]model.User)
+		data: func(count int) map[int]*model.User {
+			var users = make(map[int]*model.User)
 			for i := 0; i < count; i++ {
-				users[i] = model.User{
+				users[i] = &model.User{
 					Id:           i,
 					Username:     fmt.Sprintf("user%d", i),
 					Email:        fmt.Sprintf("user%d@email.com", i),
@@ -57,7 +58,7 @@ func (u *UserMemoryRepo) GetUserById(id int) (model.UserDTO, error) {
 // Добавление нового пользователя в карту
 func (u *UserMemoryRepo) CreateUser(name, email, password string) error {
 	dataLen := len(u.data)
-	u.data[dataLen] = model.User{
+	u.data[dataLen] = &model.User{
 		Id:           dataLen,
 		Username:     name,
 		Email:        email,
@@ -71,12 +72,35 @@ func (u *UserMemoryRepo) CreateUser(name, email, password string) error {
 	return nil
 }
 
+// Обновление данных пользователя
+func (u *UserMemoryRepo) UpdateUser(id int, input model.UserUpdate) error {
+	user, exists := u.data[id]
+	if !exists {
+		return fmt.Errorf("пользователь с таким id=%d не существует", id)
+	}
+	if input.Username != nil {
+		user.Username = *input.Username
+	}
+	if input.Email != nil {
+		user.Email = *input.Email
+	}
+	if input.AvatarURL != nil {
+		user.AvatarURL = *input.AvatarURL
+	}
+	if input.Status != nil {
+		user.Status = *input.Status
+	}
+	if input.About != nil {
+		user.About = *input.About
+	}
+	// после обновления
+	log.Printf("обновлённый пользователь: %+v\n", user)
+	return nil
+}
+
 // Удаление пользователя
 // НАДО БУДЕТ ПЕРЕПИСАТЬ, НАВЕРНОЕ
 func (u *UserMemoryRepo) DeleteUser(id int) error {
-	if _, exists := u.data[id]; !exists {
-		return fmt.Errorf("Пользователя с таким %d не существует", id)
-	}
 	delete(u.data, id)
 	return nil
 }
@@ -99,4 +123,11 @@ func (u *UserMemoryRepo) ExistsByEmail(email string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (u *UserMemoryRepo) ExistsById(id int) (bool, error) {
+	if _, exists := u.data[id]; !exists {
+		return false, nil
+	}
+	return true, nil
 }

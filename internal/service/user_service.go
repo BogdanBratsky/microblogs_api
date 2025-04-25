@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/BogdanBratsky/microblogs-api/internal/model"
@@ -21,6 +22,14 @@ func (s *userService) GetAllUsersService() ([]model.UserDTO, error) {
 }
 
 func (s *userService) GetUserByIdService(id int) (model.UserDTO, error) {
+	exists, err := s.repo.ExistsById(id)
+	if err != nil {
+		log.Println("Ошибка:", err.Error())
+		return model.UserDTO{}, errors.New("ошибка при поиске пользователя")
+	}
+	if !exists {
+		return model.UserDTO{}, fmt.Errorf("пользователь с id=%d не найден", id)
+	}
 	return s.repo.GetUserById(id)
 }
 
@@ -45,4 +54,20 @@ func (s *userService) CreateUserService(name, email, password string) error {
 	}
 	// Создание пользователя на уровне доступа к данным
 	return s.repo.CreateUser(name, email, password)
+}
+
+func (s *userService) UpdateUserService(id int, user model.UserUpdate) error {
+	log.Printf("Данные для обновления %v\n", user)
+	return s.repo.UpdateUser(id, user)
+}
+
+func (s *userService) DeleteUserService(id int) error {
+	exists, err := s.repo.ExistsById(id)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	if !exists {
+		return fmt.Errorf("пользователя с id=%d не существует", id)
+	}
+	return s.repo.DeleteUser(id)
 }

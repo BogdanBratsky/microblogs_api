@@ -31,3 +31,11 @@ type UserDTO struct {
 	Status    string `json:"status"`
 	About     string `json:"about"`
 }
+
+type UserUpdate struct {
+	Username  *string `json:"name,omitempty"`
+	Email     *string `json:"email,omitempty"`
+	AvatarURL *string `json:"avatarURL,omitempty"`
+	Status    *string `json:"status,omitempty"`
+	About     *string `json:"about,omitempty"`
+}

@@ -11,26 +11,41 @@ import (
 )
 
 func main() {
-	log.Println("Start server...")
+	log.Println("Запускаем сервер...")
 
 	r := chi.NewRouter()
 
-	// Месево...
+	// !!!MECEВО!!!
+	userRepo := memory.NewUserMemoryRepo()
+	postRepo := memory.NewPostMemoryRepo()
 
-	// Создаём хранилище юзеров в карте
-	repo := memory.NewUserMemoryRepo()
-	// Создаём экземпляр бизнес-логики, работающей с картой юзеров (repo)
-	userService := service.NewUserService(repo)
-	// Создаём обработчик запросов для юзеров, подключаем к нему userService
+	userService := service.NewUserService(userRepo)
+	postService := service.NewPostService(postRepo)
+
 	userHandler := handler.NewUserHandler(userService)
+	postHandler := handler.NewPostHandler(postService)
+	// !!!MECEВО!!!
 
 	// routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// users
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/", userHandler.GetUsersHandler)
 			r.Get("/{id}", userHandler.GetUserByIdHandler)
 			r.Post("/", userHandler.CreateUserHandler)
+			r.Patch("/{id}", userHandler.UpdateUserHandler)
+			r.Delete("/{id}", userHandler.DeleteUserHandler)
 		})
+		// posts
+		r.Route("/posts", func(r chi.Router) {
+			r.Get("/", postHandler.GetPostsHandler)
+		})
+		// auth
+		// r.Route("/auth", func(r chi.Router) {
+		// 	r.Post("/login", authHandler.)
+		// 	r.Post("/register", authHandler.)
+		// 	r.Post("/refresh", authHandler.)
+		// })
 	})
 
 	// server

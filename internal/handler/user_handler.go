@@ -44,7 +44,7 @@ func (h *UserHandlerImpl) GetUserByIdHandler(w http.ResponseWriter, r *http.Requ
 	user, err := h.service.GetUserByIdService(id)
 
 	if err != nil {
-		pkg.WriteError(w, http.StatusInternalServerError, err.Error())
+		pkg.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	pkg.WriteSuccess(w, http.StatusOK, user)
@@ -61,12 +61,60 @@ func (h *UserHandlerImpl) CreateUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	err := h.service.CreateUserService(user.Username, user.Email, user.PasswordHash)
-
 	if err != nil {
 		pkg.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
 	pkg.WriteSuccess(w, http.StatusCreated, map[string]string{
 		"message": "пользователь успешно создан",
+	})
+}
+
+// Обработчик для обновления данных пользователя
+func (h *UserHandlerImpl) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request recieved:", r.Method, r.URL)
+
+	var user model.UserUpdate
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Println("Ошибка:", err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("Ошибка:", err.Error())
+		return
+	}
+
+	err = h.service.UpdateUserService(id, user)
+	if err != nil {
+		pkg.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	pkg.WriteSuccess(w, http.StatusCreated, map[string]string{
+		"message": "данные пользователя успешно обновлены",
+	})
+}
+
+// Обработчик для удаленеия пользователя
+func (h *UserHandlerImpl) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request recieved:", r.Method, r.URL)
+
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Println("Ошибка:", err.Error())
+		return
+	}
+
+	err = h.service.DeleteUserService(id)
+	if err != nil {
+		pkg.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	pkg.WriteSuccess(w, http.StatusCreated, map[string]string{
+		"message": "пользователь успешно удалён",
 	})
 }
