@@ -7,14 +7,13 @@ import (
 	"time"
 
 	"github.com/BogdanBratsky/microblogs-api/internal/model"
-	"github.com/BogdanBratsky/microblogs-api/internal/repository"
 )
 
 type UserMemoryRepo struct {
 	data map[int]*model.User
 }
 
-func NewUserMemoryRepo() repository.UserRepository {
+func NewUserMemoryRepo() *UserMemoryRepo {
 	return &UserMemoryRepo{
 		// Создание карты пользователей
 		data: func(count int) map[int]*model.User {

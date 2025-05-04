@@ -3,12 +3,20 @@ package app
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/BogdanBratsky/microblogs-api/internal/handler"
 	"github.com/BogdanBratsky/microblogs-api/internal/repository/memory"
 	"github.com/BogdanBratsky/microblogs-api/internal/service"
 	"github.com/go-chi/chi"
 )
+
+// func loadEnd() {
+// 	err := godotenv.Load()
+// 	if err != nil {
+// 		log.Println(".env файл не найден, используем переменные окружения по умолчанию")
+// 	}
+// }
 
 type App struct {
 	router http.Handler
@@ -51,7 +59,12 @@ func NewApp() *App {
 	return &App{router: r}
 }
 
-func (a *App) Run(addr string) error {
-	log.Println("Запускаем сервер на порту: ", addr)
-	return http.ListenAndServe(addr, a.router)
+func (a *App) Run() error {
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = "3000" // дефолтное значение, если нет .env
+	}
+
+	log.Println("Запускаем сервер на порту", port)
+	return http.ListenAndServe(":"+port, a.router)
 }

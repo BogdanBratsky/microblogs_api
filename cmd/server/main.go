@@ -8,7 +8,7 @@ import (
 
 func main() {
 	a := app.NewApp()
-	if err := a.Run(":3000"); err != nil {
+	if err := a.Run(); err != nil {
 		log.Fatal("Ошибка запуска:", err)
 	}
 }
